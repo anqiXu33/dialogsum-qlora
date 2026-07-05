@@ -17,10 +17,14 @@ DATASET_ID = "knkarthick/dialogsum"        # id, dialogue, summary, topic
 MAX_TRAIN = 3000
 OUT_DIR = "qlora-dialogsum-adapter"
 
+# bf16 where the GPU supports it (Ampere+, and e.g. Kaggle), else fp16 (T4).
+USE_BF16 = torch.cuda.is_bf16_supported()
+COMPUTE_DTYPE = torch.bfloat16 if USE_BF16 else torch.float16
+
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
     bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.float16,   # fp16 on T4; bf16 needs Ampere+
+    bnb_4bit_compute_dtype=COMPUTE_DTYPE,
     bnb_4bit_use_double_quant=True,
 )
 
@@ -61,10 +65,11 @@ sft_config = SFTConfig(
     gradient_accumulation_steps=4,      # effective batch 8
     num_train_epochs=1,
     learning_rate=2e-4,
-    fp16=True,
+    bf16=USE_BF16,                      # match the 4-bit compute dtype above
+    fp16=not USE_BF16,
     logging_steps=20,
     save_strategy="epoch",
-    max_seq_length=1024,                # older trl: pass these two to SFTTrainer instead
+    max_length=1024,                    # newer trl renamed this from max_seq_length
     dataset_text_field="text",
     report_to="none",
 )

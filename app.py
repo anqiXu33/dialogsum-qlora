@@ -15,7 +15,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
 BASE = "Qwen/Qwen2.5-1.5B-Instruct"
-ADAPTER = "your-username/qlora-dialogsum-adapter"   # <-- real Hub repo
+ADAPTER = "AnqiXaq/dialogsum-qlora-adapter"   # <-- real Hub repo
 
 SYSTEM = "You read a conversation and produce a short structured summary."
 USER_TEMPLATE = (

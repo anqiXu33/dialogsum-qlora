@@ -9,10 +9,12 @@ from data import build_messages
 BASE = "Qwen/Qwen2.5-1.5B-Instruct"
 ADAPTER = "qlora-dialogsum-adapter"   # local folder or Hub repo id
 
+COMPUTE_DTYPE = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+
 bnb = BitsAndBytesConfig(
     load_in_4bit=True,
     bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.float16,
+    bnb_4bit_compute_dtype=COMPUTE_DTYPE,
     bnb_4bit_use_double_quant=True,
 )
 

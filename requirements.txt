@@ -1,12 +1,14 @@
-# Reference pins (known-good around late 2025). On Colab, torch is preinstalled —
-# don't reinstall it. If pip complains about a conflict, relax the pin rather than
-# fighting the resolver.
-transformers==4.46.0
-peft==0.13.2
-trl==0.12.0
-bitsandbytes==0.44.1
-datasets==3.0.1
-accelerate==1.0.1
-evaluate==0.4.3
-rouge_score==0.1.2
-bert_score==0.3.13
+# Lower bounds, not hard pins. On Colab/Kaggle, torch is preinstalled — don't
+# reinstall it. The core training libs (transformers/peft/trl/accelerate) must
+# co-upgrade: trl>=1.0 uses SFTConfig(max_length=...) (older trl called it
+# max_seq_length) and pulls in a newer transformers. Floors below are the
+# late-2025 known-good versions; let pip resolve upward to a compatible set.
+transformers>=4.46.0
+peft>=0.13.2
+trl>=1.0
+bitsandbytes>=0.44.1
+datasets>=3.0.1
+accelerate>=1.0.1
+evaluate>=0.4.3
+rouge_score>=0.1.2
+bert_score>=0.3.13
