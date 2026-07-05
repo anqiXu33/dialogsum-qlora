@@ -1,0 +1,17 @@
+# Private — never publish
+APPLICATION_NOTES.md
+
+# Trained artifacts (push these to the Hugging Face Hub instead, not GitHub)
+qlora-dialogsum-adapter/
+*.safetensors
+*.bin
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Environments / secrets
+.venv/
+venv/
+.env
