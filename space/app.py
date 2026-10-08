@@ -1,6 +1,7 @@
 """Gradio demo for AnqiXaq/dialogsum-qlora-adapter on a ZeroGPU Space."""
+import spaces  # must be imported before torch on ZeroGPU
+
 import gradio as gr
-import spaces
 import torch
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -15,10 +16,12 @@ USER_TEMPLATE = (
 )
 
 tokenizer = AutoTokenizer.from_pretrained(BASE)
-base = AutoModelForCausalLM.from_pretrained(BASE, torch_dtype=torch.bfloat16)
-model = PeftModel.from_pretrained(base, ADAPTER)
+# Load and merge on CPU: at startup ZeroGPU has no real GPU, and PEFT would try to
+# put the adapter weights on cuda directly. Only the final .to("cuda") is emulated.
+base = AutoModelForCausalLM.from_pretrained(BASE, dtype=torch.bfloat16, device_map="cpu")
+model = PeftModel.from_pretrained(base, ADAPTER, torch_device="cpu")
 model = model.merge_and_unload()  # plain model, faster inference
-model.to("cuda")  # ZeroGPU: place on cuda at startup, not inside the GPU function
+model.to("cuda")
 model.eval()
 
 
