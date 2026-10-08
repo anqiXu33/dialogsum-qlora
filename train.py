@@ -43,6 +43,8 @@ def parse_args():
     p.add_argument("--max-length", type=int, default=1024)
     p.add_argument("--eval-steps", type=int, default=200)
     p.add_argument("--seed", type=int, default=42)
+    p.add_argument("--precision", choices=["auto", "fp16", "bf16"], default="auto",
+                   help="auto: bf16 on Ampere+, fp16 on older GPUs such as T4/P100")
     return p.parse_args()
 
 
@@ -54,7 +56,11 @@ def main():
 
     # Real bf16 needs compute capability >= 8 (Ampere+). T4 (7.5) reports bf16 as
     # "supported" but only emulates it, which is much slower, so use fp16 there.
-    use_bf16 = torch.cuda.get_device_capability()[0] >= 8
+    if args.precision == "auto":
+        use_bf16 = torch.cuda.get_device_capability()[0] >= 8
+    else:
+        use_bf16 = args.precision == "bf16"
+    print(f"GPU: {torch.cuda.get_device_name(0)} | precision: {'bf16' if use_bf16 else 'fp16'}")
     compute_dtype = torch.bfloat16 if use_bf16 else torch.float16
 
     tokenizer = AutoTokenizer.from_pretrained(args.model)
@@ -130,6 +136,17 @@ def main():
         peft_config=lora_config,
         processing_class=tokenizer,
     )
+
+    if not use_bf16:
+        # fp16 mixed precision needs fp32 master weights: the GradScaler cannot unscale
+        # fp16/bf16 gradients. Keep only the (small) trainable LoRA weights in fp32;
+        # the 4-bit base still computes in fp16. This is the standard QLoRA setup.
+        for p in trainer.model.parameters():
+            if p.requires_grad:
+                p.data = p.data.float()
+
+    trainable = sum(p.numel() for p in trainer.model.parameters() if p.requires_grad)
+    print(f"Trainable parameters: {trainable:,}")
 
     trainer.train()
     adapter_dir = os.path.join(args.out_dir, "adapter")
