@@ -12,6 +12,7 @@ Everything runs on a single free Kaggle T4. The project is less about the final
 number than about doing the fine-tuning properly: a fair baseline, ablations that
 isolate each change, significance tests, and an error analysis.
 
+- **Live demo:** [huggingface.co/spaces/AnqiXaq/dialogue-summariser](https://huggingface.co/spaces/AnqiXaq/dialogue-summariser)
 - **Model:** [AnqiXaq/dialogsum-qlora-adapter](https://huggingface.co/AnqiXaq/dialogsum-qlora-adapter) (tags `v2-full`, `v1-3k-1epoch`)
 - **Data:** [DialogSum](https://github.com/cylnlp/dialogsum): 12,460 training dialogues; test set of 500 dialogues with 3 reference summaries each
 

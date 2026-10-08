@@ -56,6 +56,7 @@ Summary: Tom calls Sara because his daughter has a high fever. Sara agrees to lo
 Trained with QLoRA on all 12,460 training dialogues of
 [DialogSum](https://github.com/cylnlp/dialogsum), one epoch on a single T4.
 
+- **Live demo:** [AnqiXaq/dialogue-summariser](https://huggingface.co/spaces/AnqiXaq/dialogue-summariser)
 - **Code, ablations and error analysis:** [github.com/anqiXu33/dialogsum-qlora](https://github.com/anqiXu33/dialogsum-qlora)
 - **Versions:** `main` / `v2-full` (this card, recommended); `v1-3k-1epoch` (earlier 3k-dialogue run)
 
