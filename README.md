@@ -4,42 +4,46 @@ A small **Qwen2.5** model fine-tuned with **qLoRA** (4-bit NF4 base + LoRA adapt
 to condense a multi-turn conversation into a **structured summary** (topic + summary).
 
 The model reads a long exchange and emits a short, structured record — a compact
-take on interaction condensation. Trained on a single Colab T4, evaluated with
+take on interaction condensation. Trained on a single free Kaggle GPU, evaluated with
 ROUGE + BERTScore, and shipped as an interactive Hugging Face Space.
+
+> **Work in progress.** v2 (full training set, loss on the summary only, full test
+> set, fairer baselines and ablations) is being run. See [EXPERIMENTS.md](EXPERIMENTS.md).
 
 ## Repo structure
 
 ```
 dialogsum-qlora/
 ├── README.md           this file
-├── requirements.txt    training deps (Colab)
+├── EXPERIMENTS.md      exact commands for every experiment (Kaggle)
+├── requirements.txt    training deps
 ├── data.py             prompt formatting (shared)
-├── train.py            qLoRA fine-tuning  -> saves the adapter
+├── train.py            qLoRA fine-tuning (CLI flags for data size, loss type, LoRA rank)
 ├── inference.py        load base + adapter, summarise one conversation
-├── run_eval.py         ROUGE + BERTScore on the test split (base vs tuned)
-└── app.py              Hugging Face Space demo (ZeroGPU)
+├── run_eval.py         ROUGE + BERTScore on the test split, saves every prediction
+├── compare.py          Markdown table of all eval runs
+├── push_to_hub.py      tag the current Hub version, upload a new adapter
+└── space/              Hugging Face Space demo (Gradio, ZeroGPU)
 ```
 
 ## How to run
 
-1. **Train** — on Colab (Runtime → T4 GPU):
+1. **Train** — on a Kaggle or Colab GPU:
    ```bash
    pip install -r requirements.txt
-   python train.py
+   python train.py                      # see python train.py --help
    ```
-   Finishes in roughly tens of minutes on 3000 examples. Produces
-   `qlora-dialogsum-adapter/` (a few MB).
+   Produces `runs/v2/adapter/` (about 37 MB).
 
 2. **Sanity check** — `python inference.py` should print a `Topic: ... / Summary: ...`.
 
-3. **Evaluate** — `python run_eval.py` for the tuned model, then set
-   `USE_ADAPTER=False` and run again for the base model, to measure the
-   before/after delta. (The script is named `run_eval.py`, not `evaluate.py`,
+3. **Evaluate** — `python run_eval.py --name v2 --adapter runs/v2/adapter`, and
+   `python run_eval.py --name base-0shot` for the base model, then `python compare.py`.
+   (The script is named `run_eval.py`, not `evaluate.py`,
    so it doesn't shadow the pip `evaluate` library on `import evaluate`.)
 
-4. **Demo (optional)** — push the adapter to the Hub, create a Gradio Space with
-   **ZeroGPU** hardware, drop in `app.py` (set `ADAPTER` to your Hub repo id), and
-   add a Space `requirements.txt` (see below).
+4. **Demo** — create a Gradio Space with **ZeroGPU** hardware and upload the three
+   files in `space/`.
 
 ## Results
 
@@ -66,32 +70,6 @@ and still gains ~3 points. Trained adapter:
 | `Qwen/Qwen2.5-1.5B-Instruct` | **default** — good quality/speed balance on a T4 |
 | `Qwen/Qwen2.5-3B-Instruct`   | higher quality; still fits in 4-bit on a T4 |
 
-## Demo (Hugging Face Space)
-
-The Space needs its own `requirements.txt` (no bitsandbytes — fp16 on ZeroGPU):
-
-```
-torch
-transformers
-peft
-gradio
-spaces
-```
-
-And the Space `README.md` needs YAML front-matter at the very top:
-
-```
----
-title: DialogSum qLoRA Summariser
-emoji: 📝
-colorFrom: blue
-colorTo: indigo
-sdk: gradio
-app_file: app.py
-hardware: zero-gpu
----
-```
-
 ## Design notes
 
 - **Structured output** — the training target is built as `topic` + `summary`,
@@ -99,5 +77,5 @@ hardware: zero-gpu
   record with no extra labelling.
 - **Evaluation** — ROUGE for surface n-gram overlap, BERTScore for semantic
   similarity; comparing base vs. fine-tuned measures what the adapter actually added.
-- **Precision** — chosen at runtime via `torch.cuda.is_bf16_supported()`: `bfloat16`
-  on Ampere+ (and Kaggle), `float16` on Turing T4. No manual editing per GPU.
+- **Precision** — `bfloat16` on Ampere+ GPUs, `float16` otherwise. Chosen by compute
+  capability, because a T4 reports bf16 as supported but only emulates it (slowly).

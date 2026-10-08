@@ -1,87 +1,153 @@
-"""qLoRA fine-tune of Qwen2.5-1.5B on DialogSum. Runs on a free Colab T4."""
+"""qLoRA fine-tune of Qwen2.5-1.5B-Instruct on DialogSum.
+
+Defaults reproduce the v2 setup: full train split, loss on the summary only,
+eval loss on a validation subset, best checkpoint kept. Tested on Kaggle GPUs.
+
+Examples
+--------
+    python train.py                                   # v2: all data, completion-only loss
+    python train.py --max-train 3000 --loss full \
+        --out-dir runs/v1-repro                       # reproduce v1
+    python train.py --max-train 1000 --out-dir runs/n1000   # data-scaling point
+"""
+
+import argparse
+import json
+import os
 
 import torch
 from datasets import load_dataset
-from transformers import (
-    AutoModelForCausalLM,
-    AutoTokenizer,
-    BitsAndBytesConfig,
-)
 from peft import LoraConfig, prepare_model_for_kbit_training
-from trl import SFTTrainer, SFTConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from trl import SFTConfig, SFTTrainer
 
-from data import to_training_text
+from data import to_prompt_completion, to_training_text
 
-MODEL_ID = "Qwen/Qwen2.5-1.5B-Instruct"   # 0.5B / 3B also work, see README
-DATASET_ID = "knkarthick/dialogsum"        # id, dialogue, summary, topic
-MAX_TRAIN = 3000
-OUT_DIR = "qlora-dialogsum-adapter"
+DATASET_ID = "knkarthick/dialogsum"  # id, dialogue, summary, topic
 
-# bf16 where the GPU supports it (Ampere+, and e.g. Kaggle), else fp16 (T4).
-USE_BF16 = torch.cuda.is_bf16_supported()
-COMPUTE_DTYPE = torch.bfloat16 if USE_BF16 else torch.float16
 
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=COMPUTE_DTYPE,
-    bnb_4bit_use_double_quant=True,
-)
+def parse_args():
+    p = argparse.ArgumentParser()
+    p.add_argument("--model", default="Qwen/Qwen2.5-1.5B-Instruct")
+    p.add_argument("--out-dir", default="runs/v2")
+    p.add_argument("--max-train", type=int, default=None, help="first N train examples (default: all 12,460)")
+    p.add_argument("--max-eval", type=int, default=200, help="validation examples used for eval loss")
+    p.add_argument("--loss", choices=["completion", "full"], default="completion",
+                   help="completion: loss on Topic/Summary only. full: loss on every token (v1).")
+    p.add_argument("--epochs", type=float, default=1.0)
+    p.add_argument("--lr", type=float, default=2e-4)
+    p.add_argument("--batch-size", type=int, default=4)
+    p.add_argument("--grad-accum", type=int, default=2, help="effective batch = batch-size x grad-accum")
+    p.add_argument("--lora-r", type=int, default=16)
+    p.add_argument("--lora-alpha", type=int, default=None, help="default: 2 x lora-r")
+    p.add_argument("--max-length", type=int, default=1024)
+    p.add_argument("--eval-steps", type=int, default=200)
+    p.add_argument("--seed", type=int, default=42)
+    return p.parse_args()
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-if tokenizer.pad_token is None:
-    tokenizer.pad_token = tokenizer.eos_token
 
-model = AutoModelForCausalLM.from_pretrained(
-    MODEL_ID,
-    quantization_config=bnb_config,
-    device_map="auto",
-)
-model = prepare_model_for_kbit_training(model)
-model.config.use_cache = False
+def main():
+    args = parse_args()
+    if args.lora_alpha is None:
+        args.lora_alpha = 2 * args.lora_r
+    os.makedirs(args.out_dir, exist_ok=True)
 
-lora_config = LoraConfig(
-    r=16,
-    lora_alpha=32,
-    lora_dropout=0.05,
-    bias="none",
-    task_type="CAUSAL_LM",
-    target_modules=[
-        "q_proj", "k_proj", "v_proj", "o_proj",
-        "gate_proj", "up_proj", "down_proj",
-    ],
-)
+    # Real bf16 needs compute capability >= 8 (Ampere+). T4 (7.5) reports bf16 as
+    # "supported" but only emulates it, which is much slower, so use fp16 there.
+    use_bf16 = torch.cuda.get_device_capability()[0] >= 8
+    compute_dtype = torch.bfloat16 if use_bf16 else torch.float16
 
-ds = load_dataset(DATASET_ID, split="train")
-ds = ds.select(range(min(MAX_TRAIN, len(ds))))
-ds = ds.map(
-    lambda ex: to_training_text(ex, tokenizer),
-    remove_columns=ds.column_names,
-)
+    tokenizer = AutoTokenizer.from_pretrained(args.model)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
 
-sft_config = SFTConfig(
-    output_dir=OUT_DIR,
-    per_device_train_batch_size=2,
-    gradient_accumulation_steps=4,      # effective batch 8
-    num_train_epochs=1,
-    learning_rate=2e-4,
-    bf16=USE_BF16,                      # match the 4-bit compute dtype above
-    fp16=not USE_BF16,
-    logging_steps=20,
-    save_strategy="epoch",
-    max_length=1024,                    # newer trl renamed this from max_seq_length
-    dataset_text_field="text",
-    report_to="none",
-)
+    model = AutoModelForCausalLM.from_pretrained(
+        args.model,
+        quantization_config=BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=compute_dtype,
+            bnb_4bit_use_double_quant=True,
+        ),
+        device_map={"": 0},
+        dtype=compute_dtype,
+    )
+    model = prepare_model_for_kbit_training(model)
+    model.config.use_cache = False
 
-trainer = SFTTrainer(
-    model=model,
-    args=sft_config,
-    train_dataset=ds,
-    peft_config=lora_config,
-    processing_class=tokenizer,         # older trl called this `tokenizer`
-)
+    lora_config = LoraConfig(
+        r=args.lora_r,
+        lora_alpha=args.lora_alpha,
+        lora_dropout=0.05,
+        bias="none",
+        task_type="CAUSAL_LM",
+        target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    )
 
-trainer.train()
-trainer.save_model(OUT_DIR)
-print(f"\nDone. Adapter saved to: {OUT_DIR}")
+    train = load_dataset(DATASET_ID, split="train").shuffle(seed=args.seed)
+    if args.max_train:
+        train = train.select(range(min(args.max_train, len(train))))
+    val = load_dataset(DATASET_ID, split="validation").select(range(args.max_eval))
+
+    if args.loss == "completion":
+        fmt = to_prompt_completion
+    else:
+        fmt = lambda ex: to_training_text(ex, tokenizer)  # noqa: E731
+    train = train.map(fmt, remove_columns=train.column_names)
+    val = val.map(fmt, remove_columns=val.column_names)
+
+    sft_config = SFTConfig(
+        output_dir=args.out_dir,
+        num_train_epochs=args.epochs,
+        per_device_train_batch_size=args.batch_size,
+        per_device_eval_batch_size=args.batch_size,
+        gradient_accumulation_steps=args.grad_accum,
+        learning_rate=args.lr,
+        lr_scheduler_type="cosine",
+        warmup_steps=20,
+        bf16=use_bf16,
+        fp16=not use_bf16,
+        max_length=args.max_length,
+        completion_only_loss=(args.loss == "completion"),
+        logging_steps=20,
+        eval_strategy="steps",
+        eval_steps=args.eval_steps,
+        save_strategy="steps",
+        save_steps=args.eval_steps,
+        save_total_limit=2,
+        load_best_model_at_end=True,
+        metric_for_best_model="eval_loss",
+        greater_is_better=False,
+        seed=args.seed,
+        report_to="none",
+    )
+
+    trainer = SFTTrainer(
+        model=model,
+        args=sft_config,
+        train_dataset=train,
+        eval_dataset=val,
+        peft_config=lora_config,
+        processing_class=tokenizer,
+    )
+
+    trainer.train()
+    adapter_dir = os.path.join(args.out_dir, "adapter")
+    trainer.save_model(adapter_dir)
+
+    run_info = {
+        "args": vars(args),
+        "n_train": len(train),
+        "best_eval_loss": trainer.state.best_metric,
+        "log_history": trainer.state.log_history,
+    }
+    with open(os.path.join(args.out_dir, "run_info.json"), "w") as f:
+        json.dump(run_info, f, indent=2)
+
+    print(f"\nDone. Best eval loss: {trainer.state.best_metric}")
+    print(f"Adapter saved to: {adapter_dir}")
+    print(f"Next: python run_eval.py --adapter {adapter_dir} --name {os.path.basename(args.out_dir)}")
+
+
+if __name__ == "__main__":
+    main()
