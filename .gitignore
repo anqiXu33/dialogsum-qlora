@@ -20,7 +20,7 @@ venv/
 .DS_Store
 
 # Training runs and eval outputs (adapters go to the Hub; keep results/ if you want them in git)
-runs/
+/runs/
 
 # Downloaded Kaggle outputs (checkpoints are large)
 kaggle/

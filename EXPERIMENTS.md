@@ -78,5 +78,7 @@ Optional, if quota is left: a 7B zero-shot reference point.
 
 ## What to send back
 
-The `results/` folder (all `.json` and `.jsonl` files) and `runs/*/run_info.json`.
+The `results/` folder (all `.json` and `.jsonl` files) and `runs/*/run_info.json`
+(stored in the repo as `results/training_logs/<run>.json`). Download a whole run with
+`kaggle kernels output <user>/<notebook> -p kaggle/<stage>`; `kaggle/` is git-ignored.
 These are enough to build the tables, the data-scaling plot and the error analysis.

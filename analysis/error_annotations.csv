@@ -1,0 +1,51 @@
+sample_index,dialogue_id,label,note
+0,test_432,ok,
+1,test_197,factual,Says #Person2# had a car accident; dialogue says 'not exactly' (hit a tree branch)
+2,test_388,ok,
+3,test_455,factual,'banana-flavored burger': flavour bound to the wrong item (it was the milkshake)
+4,test_215,ok,
+5,test_20,ok,
+6,test_132,speaker,Attributes Rocky's preference ('affectionate woman') to #Person1#'s suggestion
+7,test_494,ok,
+8,test_261,speaker,Writes '#Person1# thinks Tom's assistant...' although #Person1# is Tom
+9,test_248,factual,'Bill invites Sue to his party': it is Sue's birthday party
+10,test_207,speaker,Says #Person1# tells Ann the schedule; Ann tells Mr. Jones
+11,test_470,ok,
+12,test_401,ok,
+13,test_424,ok,
+14,test_155,ok,
+15,test_495,ok,
+16,test_244,factual,'Bill doesn't understand it': Bill finds the schedule exhausting
+17,test_183,ok,
+18,test_298,ok,
+19,test_456,factual,Merges the lantern puzzles and the poems into one claim
+20,test_464,factual,Wrong causal link: suggests cooking together 'because #Person2# is useless at cooking'
+21,test_111,factual,Invented 'Karen thinks she might have missed something'; omits the key reason (she is a Comp Lit major)
+22,test_258,ok,
+23,test_71,ok,
+24,test_144,ok,
+25,test_386,factual,Wrong reason for borrowing money (phone out of service vs paying for a computer)
+26,test_48,ok,
+27,test_316,speaker,"'Nancy calls Tyler's house': Andy is the caller, Nancy answers"
+28,test_409,missed_point,Lists the order but misses the point: #Person1# is shocked by the price
+29,test_128,ok,
+30,test_465,ok,
+31,test_272,ok,
+32,test_361,ok,
+33,test_414,ok,
+34,test_308,ok,
+35,test_461,ok,
+36,test_75,ok,
+37,test_158,ok,
+38,test_50,ok,
+39,test_373,ok,
+40,test_37,ok,
+41,test_460,ok,
+42,test_435,speaker,Says Greg wants to apply for college sports; Greg is the college recruiter
+43,test_350,ok,
+44,test_169,ok,
+45,test_241,ok,
+46,test_286,ok,
+47,test_51,ok,
+48,test_181,ok,
+49,test_222,ok,
