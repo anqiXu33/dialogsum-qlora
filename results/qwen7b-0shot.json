@@ -1,0 +1,16 @@
+{
+  "name": "qwen7b-0shot",
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "adapter": null,
+  "revision": null,
+  "shots": 0,
+  "n": 1500,
+  "format_followed": 0.918,
+  "rouge1": 0.2882880517393906,
+  "rouge2": 0.08485717653317527,
+  "rougeL": 0.21930316596478477,
+  "bertscore_f1": 0.8794320061604182,
+  "mean_pred_words": 39.58533333333333,
+  "mean_ref_words": 18.752,
+  "generation_seconds": 1771.3
+}

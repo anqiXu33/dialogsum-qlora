@@ -1,0 +1,16 @@
+{
+  "name": "n3000",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "adapter": "runs/n3000/adapter",
+  "revision": null,
+  "shots": 0,
+  "n": 1500,
+  "format_followed": 1.0,
+  "rouge1": 0.3990288191310113,
+  "rouge2": 0.14894246903353262,
+  "rougeL": 0.3216716703857069,
+  "bertscore_f1": 0.9135415652592976,
+  "mean_pred_words": 23.256666666666668,
+  "mean_ref_words": 18.752,
+  "generation_seconds": 709.9
+}

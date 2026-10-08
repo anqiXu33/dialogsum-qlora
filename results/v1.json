@@ -1,0 +1,16 @@
+{
+  "name": "v1",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "adapter": "AnqiXaq/dialogsum-qlora-adapter",
+  "revision": "v1-3k-1epoch",
+  "shots": 0,
+  "n": 1500,
+  "format_followed": 1.0,
+  "rouge1": 0.38930278190660106,
+  "rouge2": 0.1408994175604259,
+  "rougeL": 0.31337094474628147,
+  "bertscore_f1": 0.9115286483367284,
+  "mean_pred_words": 22.704,
+  "mean_ref_words": 18.752,
+  "generation_seconds": 736.7
+}

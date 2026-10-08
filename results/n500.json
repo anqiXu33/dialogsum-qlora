@@ -1,0 +1,16 @@
+{
+  "name": "n500",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "adapter": "runs/n500/adapter",
+  "revision": null,
+  "shots": 0,
+  "n": 1500,
+  "format_followed": 1.0,
+  "rouge1": 0.36124383323646725,
+  "rouge2": 0.12758205852241078,
+  "rougeL": 0.29041406195111497,
+  "bertscore_f1": 0.9074320842027664,
+  "mean_pred_words": 25.624666666666666,
+  "mean_ref_words": 18.752,
+  "generation_seconds": 763.9
+}

@@ -1,0 +1,16 @@
+{
+  "name": "v2",
+  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "adapter": "runs/v2/adapter",
+  "revision": null,
+  "shots": 0,
+  "n": 1500,
+  "format_followed": 1.0,
+  "rouge1": 0.41410815541977897,
+  "rouge2": 0.15685857186688784,
+  "rougeL": 0.3345382091664524,
+  "bertscore_f1": 0.9165322386423747,
+  "mean_pred_words": 21.93,
+  "mean_ref_words": 18.752,
+  "generation_seconds": 694.6
+}
