@@ -7,9 +7,9 @@ from peft import PeftModel
 from data import build_messages
 
 BASE = "Qwen/Qwen2.5-1.5B-Instruct"
-ADAPTER = "qlora-dialogsum-adapter"   # local folder or Hub repo id
+ADAPTER = "AnqiXaq/dialogsum-qlora-adapter"   # Hub repo id, or a local folder such as runs/v2/adapter
 
-COMPUTE_DTYPE = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+COMPUTE_DTYPE = torch.bfloat16 if torch.cuda.get_device_capability()[0] >= 8 else torch.float16
 
 bnb = BitsAndBytesConfig(
     load_in_4bit=True,
