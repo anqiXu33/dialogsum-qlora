@@ -16,6 +16,8 @@ isolate each change, significance tests, and an error analysis.
 - **Model:** [AnqiXaq/dialogsum-qlora-adapter](https://huggingface.co/AnqiXaq/dialogsum-qlora-adapter) (tags `v2-full`, `v1-3k-1epoch`)
 - **Data:** [DialogSum](https://github.com/cylnlp/dialogsum): 12,460 training dialogues; test set of 500 dialogues with 3 reference summaries each
 
+![The demo Space summarising a booking conversation](assets/demo.png)
+
 ## Key results
 
 ![ROUGE-L against number of training dialogues](assets/scaling.png)
