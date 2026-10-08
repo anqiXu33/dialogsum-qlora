@@ -4,6 +4,8 @@
   dialogues (each has 3 reference summaries), two-sided p-values.
   `python analysis/significance.py results v2 v1`
 - `plot_scaling.py`: data-scaling figure in `assets/`.
+- `error_review.md`: the 50 annotated examples with dialogue, references and output
+  (rebuild with `make_error_review.py`).
 - `error_annotations.csv`: manual error analysis of v2 on 50 test dialogues
   sampled with `random.seed(0)` (one annotator). Labels:
   - `ok`: faithful and covers the main point (minor omissions allowed)
