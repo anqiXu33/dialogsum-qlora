@@ -22,18 +22,18 @@ isolate each change, significance tests, and an error analysis.
 
 ![ROUGE-L against number of training dialogues](assets/scaling.png)
 
-| Model | Train dialogues | ROUGE-1 | ROUGE-2 | ROUGE-L | BERTScore F1 | Words |
+| Model | Train | ROUGE‑1 | ROUGE‑2 | ROUGE‑L | BERTScore | Words |
 |---|---:|---:|---:|---:|---:|---:|
-| Qwen2.5-1.5B, zero-shot | 0 | 0.227 | 0.062 | 0.174 | 0.879 | 41.0 |
-| Qwen2.5-1.5B, 1-shot | 0 | 0.241 | 0.075 | 0.192 | 0.884 | 33.7 |
-| Qwen2.5-7B, zero-shot | 0 | 0.288 | 0.085 | 0.219 | 0.879 | 39.6 |
+| Qwen2.5‑1.5B, zero‑shot | 0 | 0.227 | 0.062 | 0.174 | 0.879 | 41.0 |
+| Qwen2.5‑1.5B, 1‑shot | 0 | 0.241 | 0.075 | 0.192 | 0.884 | 33.7 |
+| Qwen2.5‑7B, zero‑shot | 0 | 0.288 | 0.085 | 0.219 | 0.879 | 39.6 |
 | QLoRA 1.5B | 500 | 0.361 | 0.128 | 0.290 | 0.907 | 25.6 |
 | QLoRA 1.5B | 1,000 | 0.385 | 0.139 | 0.311 | 0.911 | 22.2 |
 | QLoRA 1.5B | 3,000 | 0.399 | 0.149 | 0.322 | 0.914 | 23.3 |
 | **QLoRA 1.5B (v2)** | **12,460** | **0.414** | **0.157** | **0.335** | **0.917** | **21.9** |
 
-Full DialogSum test set, scores averaged over the three references of each
-dialogue. Reference summaries average 18.8 words. Greedy decoding, same prompt for
+Train = number of training dialogues. Full DialogSum test set, scores averaged
+over the three references of each dialogue. Reference summaries average 18.8 words. Greedy decoding, same prompt for
 every model. Raw predictions for every row are in [`results/`](results).
 
 **What the numbers say**
@@ -56,7 +56,7 @@ every model. Raw predictions for every row are in [`results/`](results).
 v1 (3k dialogues, full-sequence loss) scored 0.313 ROUGE-L, v2 scores 0.335. The
 ablations split the +2.1 points:
 
-| Change | ROUGE-L | Δ | 95% CI | p |
+| Change | ROUGE‑L | Δ | 95% CI | p |
 |---|---:|---:|---|---:|
 | v1 | 0.313 | | | |
 | + training setup (shuffled subset, cosine LR, fp16, best checkpoint) | 0.317 | +0.3 | [-0.4, +1.0] | 0.36 |
@@ -113,7 +113,7 @@ penalise any of these errors much, which is why the manual pass matters.
 
 | Setting | Value |
 |---|---|
-| Base model | Qwen/Qwen2.5-1.5B-Instruct, 4-bit NF4, double quantisation |
+| Base model | Qwen/Qwen2.5‑1.5B‑Instruct, 4-bit NF4, double quantisation |
 | LoRA | r = 16, α = 32, dropout 0.05, all attention and MLP projections (18.5M trainable parameters) |
 | Training | 1 epoch, LR 2e-4 cosine, 20 warm-up steps, batch 4 × 2 accumulation, max length 1024, seed 42 |
 | Hardware | 1 × NVIDIA T4 (Kaggle) |

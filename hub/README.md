@@ -65,11 +65,11 @@ Trained with QLoRA on all 12,460 training dialogues of
 DialogSum test set (500 dialogues, 3 reference summaries each; scores averaged
 over references). Greedy decoding, same prompt for every model.
 
-| Model | ROUGE-1 | ROUGE-2 | ROUGE-L | BERTScore F1 | Words |
+| Model | ROUGE‑1 | ROUGE‑2 | ROUGE‑L | BERTScore | Words |
 |---|---:|---:|---:|---:|---:|
-| Qwen2.5-1.5B-Instruct, zero-shot | 0.227 | 0.062 | 0.174 | 0.879 | 41.0 |
-| Qwen2.5-1.5B-Instruct, 1-shot | 0.241 | 0.075 | 0.192 | 0.884 | 33.7 |
-| Qwen2.5-7B-Instruct, zero-shot | 0.288 | 0.085 | 0.219 | 0.879 | 39.6 |
+| Qwen2.5‑1.5B‑Instruct, zero‑shot | 0.227 | 0.062 | 0.174 | 0.879 | 41.0 |
+| Qwen2.5‑1.5B‑Instruct, 1‑shot | 0.241 | 0.075 | 0.192 | 0.884 | 33.7 |
+| Qwen2.5‑7B‑Instruct, zero‑shot | 0.288 | 0.085 | 0.219 | 0.879 | 39.6 |
 | v1: this adapter, 3k dialogues | 0.389 | 0.141 | 0.313 | 0.912 | 22.7 |
 | **v2: this adapter, 12.5k dialogues** | **0.414** | **0.157** | **0.335** | **0.917** | **21.9** |
 
@@ -120,7 +120,7 @@ without PEFT, merge the weights with `model.merge_and_unload()`.
 
 | Setting | Value |
 |---|---|
-| Base model | Qwen/Qwen2.5-1.5B-Instruct, 4-bit NF4, double quantisation |
+| Base model | Qwen/Qwen2.5‑1.5B‑Instruct, 4-bit NF4, double quantisation |
 | Method | QLoRA, TRL `SFTTrainer`, loss on the Topic/Summary answer only |
 | LoRA | r = 16, α = 32, dropout 0.05, all attention and MLP projections (18.5M trainable parameters) |
 | Data | All 12,460 DialogSum training dialogues, shuffled (seed 42) |
