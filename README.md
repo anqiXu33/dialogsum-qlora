@@ -1,4 +1,14 @@
-# DialogSum QLoRA: dialogue summarisation with a 1.5B model
+<h1 align="center">DialogSum QLoRA</h1>
+
+<p align="center"><em>Dialogue summarisation with a 1.5B model, fine-tuned on a single free T4.</em></p>
+
+<p align="center">
+  <a href="https://huggingface.co/spaces/AnqiXaq/dialogue-summariser"><img src="https://img.shields.io/badge/demo-Hugging%20Face%20Space-FFD21E?logo=huggingface&logoColor=black" alt="Live demo on Hugging Face"></a>
+  <a href="https://huggingface.co/AnqiXaq/dialogsum-qlora-adapter"><img src="https://img.shields.io/badge/model-QLoRA%20adapter-FFD21E?logo=huggingface&logoColor=black" alt="QLoRA adapter on Hugging Face"></a>
+  <img src="https://img.shields.io/badge/base-Qwen2.5--1.5B--Instruct-615CED" alt="Base model Qwen2.5-1.5B-Instruct">
+  <img src="https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white" alt="Python">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/code-Apache%202.0-blue" alt="Code license Apache 2.0"></a>
+</p>
 
 Fine-tuning **Qwen2.5-1.5B-Instruct** with **QLoRA** (4-bit NF4 base + LoRA adapters)
 to turn a multi-turn conversation into a short structured record:
@@ -143,7 +153,8 @@ python analysis/significance.py results v2 v1          # paired bootstrap
 ├── results/              predictions, metrics and training logs for every run
 ├── space/                Gradio demo for a Hugging Face Space (ZeroGPU)
 ├── hub/README.md         model card for the Hugging Face repo
-└── EXPERIMENTS.md        Kaggle runbook
+├── EXPERIMENTS.md        Kaggle runbook
+└── LICENSE               Apache 2.0 (code)
 ```
 
 ## Limitations
@@ -156,3 +167,9 @@ python analysis/significance.py results v2 v1          # paired bootstrap
   should be read together with their confidence intervals.
 - DialogSum is licensed CC BY-NC-SA 4.0, so models trained on it inherit a
   non-commercial restriction.
+
+## License
+
+Code in this repository is released under the [Apache License 2.0](LICENSE). The
+trained adapter is derived from DialogSum (CC BY-NC-SA 4.0), so it is for
+non-commercial use only.
